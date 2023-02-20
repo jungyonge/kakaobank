@@ -25,12 +25,13 @@ public class ParseSchoolHandler {
 
         for (String reply : list) {
             String pure = refineReply(reply);
-            System.out.println(pure);
             String school = parseSchool(pure);
-            System.out.println(school);
-            System.out.println(" ");
             school = modifySchoolName(school);
-            map.put(school, map.getOrDefault(school, 0) + 1);
+            if(school.isEmpty()){
+                map.put(reply, map.getOrDefault(reply, 0) + 1);
+            }else {
+                map.put(school.trim(), map.getOrDefault(school.trim(), 0) + 1);
+            }
         }
 
         for (String key : map.keySet()) {
@@ -133,10 +134,15 @@ public class ParseSchoolHandler {
     public static final Pattern SCHOOL_FULL_PATTERN = Pattern.compile(
         "(?<school>"
             + "[가-힣]+[a-zA-Z]?(?:초등학교|초 등학교|초등 학교|초등학 교|초 등 학교|초 등 학 교)|"
-            + "[가-힣]+[a-zA-Z]?(?:중학교|중 학교|중 학 교|중학 교)|"
-            + "[가-힣]+[a-zA-Z]?(?:고등학교|고 등학교|고등 학교|고등학 교|고 등 학교|고 등 학 교)|"
-            + "[가-힣]+[a-zA-Z]?(?:대학교|대 학교|대 학 교|대학 교)"
-
+            + "[가-힣]+[a-zA-Z]?(?: 남자 중학교|남자중학교|남자중 학교|남자중 학 교|남자중학 교)|"
+            + "[가-힣]+[a-zA-Z]?(?: 여자 중학교|여자중학교|여자중 학교|여자중 학 교|여자중학 교)|"
+            + "[가-힣]+[a-zA-Z]?(?: 중학교|중학교|중 학교|중 학 교|중학 교)|"
+            + "[가-힣]+[a-zA-Z]?(?: 남자고등학교|남자고등학교|남자고 등학교|남자고등 학교|남자고등학 교|남자고 등 학교|남자고 등 학 교)|"
+            + "[가-힣]+[a-zA-Z]?(?: 여자고등학교|여자고등학교|여자고 등학교|여자고등 학교|여자고등학 교|여자고 등 학교|여자고 등 학 교)|"
+            + "[가-힣]+[a-zA-Z]?(?: 고등학교|고등학교|고 등학교|고등 학교|고등학 교|고 등 학교|고 등 학 교|체고)|"
+            + "[가-힣]+[a-zA-Z]?(?: 대학교|대학교|대 학교|대 학 교|대학 교)|"
+            + "[가-힣]+[a-zA-Z]?국제학교"
+            + "[가-힣]+[a-zA-Z]?학교"
             + ")");
 
     public static final Pattern SCHOOL_SHORT_PATTERN = Pattern.compile(
