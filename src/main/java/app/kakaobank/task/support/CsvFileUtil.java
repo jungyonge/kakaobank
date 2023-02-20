@@ -24,7 +24,7 @@ public class CsvFileUtil {
                 if (line.startsWith("\"")) {
                     sb = new StringBuilder();
                 }
-                sb.append(line);
+                sb.append(line).append(" ");
                 if (line.endsWith("\"")) {
                     list.add(sb.toString());
                 }
