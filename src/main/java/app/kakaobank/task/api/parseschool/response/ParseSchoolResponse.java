@@ -9,4 +9,15 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ParseSchoolResponse {
 
+    private boolean status;
+
+    private String path;
+
+    private long totalParseCount;
+
+    private int successParseCount;
+
+    private int failParseCount;
+
+
 }

@@ -10,5 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public class ParseSchoolRequest {
 
+    private String path;
+
     private MultipartFile excelFile;
 }
