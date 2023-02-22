@@ -65,12 +65,9 @@ public class FileUtil {
             throw e;
         }
 
-        try {
-            // 컨트랙 소스 변경, 쓰기
-            var writer = new BufferedWriter(new FileWriter(file));
-            writer.write(log);
+        try (var writer = new BufferedWriter(new FileWriter(file))) {
 
-            writer.close();
+            writer.write(log);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw e;

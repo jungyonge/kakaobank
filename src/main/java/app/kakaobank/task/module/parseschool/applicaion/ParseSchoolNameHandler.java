@@ -14,32 +14,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-@Service
 @Slf4j
+@RequiredArgsConstructor
+@Service
 public class ParseSchoolNameHandler {
 
     private final FileUtil fileUtil;
 
     private final ParseLogRepository parseLogRepository;
 
-    public ParseSchoolNameHandler(FileUtil fileUtil, ParseLogRepository parseLogRepository) {
-        this.fileUtil = fileUtil;
-        this.parseLogRepository = parseLogRepository;
-    }
-
     @Transactional
     public ParseSchoolResponse parseSchoolName(MultipartFile file, String path) {
-
         //csv 파싱
         var list = fileUtil.readCsvToList(file);
 
         HashMap<String, Integer> countMap = new HashMap<>();
-        StringBuilder parseCountResult = new StringBuilder();
+        String parseCountResult;
         StringBuilder parseLogResult = new StringBuilder();
 
         parseLogResult.append("------------------------------").append("\n");
@@ -67,7 +63,7 @@ public class ParseSchoolNameHandler {
             //정규식을 활용하여 학교이름 추출
             String schoolName = parseSchoolName(pureReply);
             //함축어 학교이름 변경 여고 -> 여자고등학교
-            schoolName = modifySchoolName(schoolName).replaceAll(" ", "");
+            schoolName = modifySchoolName(schoolName).replace(" ", "");
 
             //파싱 성공,실패 확인을 위핸 log 저장
             ParseLogStatus stats = ParseLogStatus.SUCCESS;
@@ -91,14 +87,7 @@ public class ParseSchoolNameHandler {
             replyId++;
         }
 
-        //카운트 별로 내림차순 정렬
-        List<String> keySet = new ArrayList<>(countMap.keySet());
-        keySet.sort((o1, o2) -> countMap.get(o2).compareTo(countMap.get(o1)));
-        parseCountResult.append("csv-file name : ").append(file.getOriginalFilename())
-            .append("\n");
-        for (String key : keySet) {
-            parseCountResult.append(key).append("\t").append(countMap.get(key)).append("\n");
-        }
+        parseCountResult = makeResult(countMap, file.getOriginalFilename());
 
         parseLogResult.append("------------------------------").append("\n");
         parseLogResult.append("parse end time : ").append(LocalDateTime.now()).append("\n");
@@ -115,14 +104,29 @@ public class ParseSchoolNameHandler {
         logger.info("------------------------------");
 
         try {
-            fileUtil.writeLog(path, "result.txt", parseCountResult.toString());
-            fileUtil.writeLog(path, "result.log", parseLogResult.toString());
+            fileUtil.writeLog(path, "result.txt", parseCountResult);
+//            fileUtil.writeLog(path, "result.log", parseLogResult.toString());
         } catch (IOException e) {
             logger.error(ParseDomainValidationMessage.ERROR_CREATE_RESULT.getMessage());
             throw new DomainValidationException(ParseDomainValidationMessage.ERROR_CREATE_RESULT);
         }
 
         return new ParseSchoolResponse(true, path, replyId - 1, successCount, failCount);
+    }
+
+    private String makeResult(HashMap<String, Integer> countMap, String fileName) {
+        StringBuilder parseCountResult = new StringBuilder();
+
+        //카운트 별로 내림차순 정렬
+        List<String> keySet = new ArrayList<>(countMap.keySet());
+        keySet.sort((o1, o2) -> countMap.get(o2).compareTo(countMap.get(o1)));
+        parseCountResult.append("csv-file name : ").append(fileName)
+            .append("\n");
+        for (String key : keySet) {
+            parseCountResult.append(key).append("\t").append(countMap.get(key)).append("\n");
+        }
+
+        return parseCountResult.toString();
 
     }
 
