@@ -34,7 +34,7 @@ public class ParseLog {
     private String csvFileName;
 
     @Enumerated(EnumType.STRING)
-    private ParseLogStatus parseLogStatus;
+    private ParseLogStatus status;
 
     private LocalDateTime created;
 
@@ -69,7 +69,7 @@ public class ParseLog {
     }
 
     private void setParseLogStatus(ParseLogStatus parseLogStatus) {
-        this.parseLogStatus = parseLogStatus;
+        this.status = parseLogStatus;
     }
 
     private void setCreated(LocalDateTime created) {

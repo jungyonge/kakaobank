@@ -39,7 +39,7 @@
   - csv 파일과 결과를 저장할 path 파라미터필요 (아래 api 명세서확인)
 - 파싱로직
   - 1차 정제로직을 거침
-    - 불필요한 특수문자 제거
+    - 불필요한 특수문자,단 제거
   - 정규식을 활용하여 학교이름추출
   - 추출된 학교이름이 함축어면 replace (ex : 여고 -> 여자고등학교)
   - 완성된 학교이름을 통해 count
@@ -48,7 +48,12 @@
 ---
 ## 빌드, 실행
 ~~~
+//압축해제 후 디렉토리 이동
+cd kakaobank
 
+//미리 생성한 결과물 확인
+vi result.txt
+vi result.log
 
 //빌드
 ./gradlew clean build
@@ -57,7 +62,7 @@
 cd build/libs
 
 //실행
-java -jar koreainvestment-0.0.1-SNAPSHOT.jar
+java -jar task-0.0.1-SNAPSHOT.jar
 
 //swagger 접속
 http://localhost:8080/swagger-ui/index.html
@@ -73,8 +78,8 @@ http://localhost:8080/h2-console/login.jsp
   - 전체 list를 다시 검색하면 비효율적 같은데, 개선점 고민해봐야 겠다.
 - 이러한 과제는 어떻게 테스트코드를 코딩해야 하는지 모르겠다.
 ---
+
 ## API 명세서
-----
 ### 학교이름파싱 API
 
 * **설명**
