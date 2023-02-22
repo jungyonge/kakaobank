@@ -48,12 +48,12 @@
 ---
 ## 빌드, 실행
 ~~~
-//압축해제 후 디렉토리 이동
-cd kakaobank
-
 //미리 생성한 결과물 확인
 vi result.txt
 vi result.log
+
+//압축해제 후 디렉토리 이동
+cd kakaobank
 
 //빌드
 ./gradlew clean build
