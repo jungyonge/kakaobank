@@ -105,7 +105,7 @@ public class ParseSchoolNameHandler {
 
         try {
             fileUtil.writeLog(path, "result.txt", parseCountResult);
-//            fileUtil.writeLog(path, "result.log", parseLogResult.toString());
+            fileUtil.writeLog(path, "result.log", parseLogResult.toString());
         } catch (IOException e) {
             logger.error(ParseDomainValidationMessage.ERROR_CREATE_RESULT.getMessage());
             throw new DomainValidationException(ParseDomainValidationMessage.ERROR_CREATE_RESULT);
