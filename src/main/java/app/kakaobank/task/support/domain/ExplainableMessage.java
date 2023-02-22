@@ -1,4 +1,4 @@
-package app.kakaobank.task.domain;
+package app.kakaobank.task.support.domain;
 
 public interface ExplainableMessage {
 

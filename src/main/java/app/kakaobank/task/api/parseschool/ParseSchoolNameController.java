@@ -4,7 +4,6 @@ package app.kakaobank.task.api.parseschool;
 import app.kakaobank.task.api.parseschool.reqeust.ParseSchoolRequest;
 import app.kakaobank.task.api.parseschool.response.ParseSchoolResponse;
 import app.kakaobank.task.module.parseschool.applicaion.ParseSchoolNameHandler;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,20 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class ParseSchoolNameController {
 
     private final ParseSchoolNameHandler parseSchoolHandler;
-    private final String excelLocation;
 
 
-    public ParseSchoolNameController(ParseSchoolNameHandler parseSchoolHandler,
-        @Value("${spring.servlet.multipart.location}") String excelLocation) {
+    public ParseSchoolNameController(ParseSchoolNameHandler parseSchoolHandler) {
         this.parseSchoolHandler = parseSchoolHandler;
-        this.excelLocation = excelLocation;
     }
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ParseSchoolResponse> parseSchoolName(
         @ModelAttribute ParseSchoolRequest request)  {
 
-        var result = parseSchoolHandler.parseSchoolName(request.getExcelFile(), request.getPath());
+        var result = parseSchoolHandler.parseSchoolName(request.getFile(), request.getPath());
 
         return ResponseEntity.ok(result);
     }

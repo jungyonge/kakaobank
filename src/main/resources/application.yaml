@@ -7,7 +7,6 @@ spring:
     multipart:
       max-request-size: 10000MB
       max-file-size: 10000MB
-      location: /Users/jungyong/Downloads
 
   h2:
     console:
@@ -25,13 +24,13 @@ spring:
       ddl-auto: create-drop
     properties:
       hibernate:
-        format_sql: true
-        show_sql: true
+        format_sql: false
+        show_sql: false
     defer-datasource-initialization: true
 
 logging:
   level:
-    koreainvestment: debug
+    kakaobank: debug
 
 server:
   error:

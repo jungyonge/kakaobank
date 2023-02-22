@@ -1,10 +1,14 @@
 package app.kakaobank.task.module.parseschool.applicaion;
 
 import app.kakaobank.task.api.parseschool.response.ParseSchoolResponse;
+import app.kakaobank.task.module.parseschool.domain.ParseDomainValidationMessage;
 import app.kakaobank.task.module.parseschool.domain.ParseLog;
 import app.kakaobank.task.module.parseschool.domain.ParseLogRepository;
 import app.kakaobank.task.module.parseschool.domain.ParseLogStatus;
 import app.kakaobank.task.support.FileUtil;
+import app.kakaobank.task.support.domain.DomainValidationException;
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -27,45 +32,94 @@ public class ParseSchoolNameHandler {
         this.parseLogRepository = parseLogRepository;
     }
 
-    public ParseSchoolResponse parseSchoolName(MultipartFile excelFile, String path) {
+    @Transactional
+    public ParseSchoolResponse parseSchoolName(MultipartFile file, String path) {
 
-        var list = fileUtil.readCsvToList(excelFile);
-        HashMap<String, Integer> map = new HashMap<>();
-        List<ParseLog> parseLogs = new ArrayList<>();
+        //csv 파싱
+        var list = fileUtil.readCsvToList(file);
+
+        HashMap<String, Integer> countMap = new HashMap<>();
+        StringBuilder parseCountResult = new StringBuilder();
+        StringBuilder parseLogResult = new StringBuilder();
+
+        parseLogResult.append("------------------------------").append("\n");
+        parseLogResult.append("parse start time : ").append(LocalDateTime.now()).append("\n");
+        parseLogResult.append("csv file name : ").append(file.getOriginalFilename())
+            .append("\n");
+        parseLogResult.append("parse target count : ").append(list.size()).append("\n");
+        parseLogResult.append("------------------------------").append("\n");
+
+        logger.info("------------------------------");
+        logger.info("parse start time : {}", LocalDateTime.now());
+        logger.info("csv file name :  {}", file.getOriginalFilename());
+        logger.info("parse target count : {}", list.size());
+        logger.info("------------------------------");
 
         int failCount = 0;
         int successCount = 0;
         long replyId = 1;
 
-
         for (String reply : list) {
+
             ParseLog parseLog;
+            //특수문자, 불필요단어 정제
             String pureReply = refineReply(reply);
+            //정규식을 활용하여 학교이름 추출
             String schoolName = parseSchoolName(pureReply);
+            //함축어 학교이름 변경 여고 -> 여자고등학교
             schoolName = modifySchoolName(schoolName).replaceAll(" ", "");
 
+            //파싱 성공,실패 확인을 위핸 log 저장
+            ParseLogStatus stats = ParseLogStatus.SUCCESS;
             if (schoolName.isEmpty() || !verifySchoolName(schoolName)) {
-                parseLog = ParseLog.create(reply, schoolName, excelFile.getOriginalFilename(), replyId,
-                    ParseLogStatus.FAIL);
+                stats = ParseLogStatus.FAIL;
+            }
+            parseLog = ParseLog.create(reply, schoolName, file.getOriginalFilename(), replyId,
+                stats);
+            parseLogRepository.save(parseLog);
+
+            if (stats.equals(ParseLogStatus.FAIL)) {
+                parseLogResult.append("parse fail parseLogId : ").append(parseLog.getId())
+                    .append("\n");
+                logger.info("parse fail parseLogId : {}", parseLog.getId());
                 failCount++;
             } else {
-                parseLog = ParseLog.create(reply, schoolName, excelFile.getOriginalFilename(), replyId,
-                    ParseLogStatus.SUCCESS);
-                map.put(schoolName, map.getOrDefault(schoolName, 0) + 1);
+                countMap.put(schoolName, countMap.getOrDefault(schoolName, 0) + 1);
                 successCount++;
             }
-            parseLogs.add(parseLog);
 
             replyId++;
         }
 
-        parseLogRepository.saveAll(parseLogs);
-
-        List<String> keySet = new ArrayList<>(map.keySet());
-        keySet.sort((o1, o2) -> map.get(o2).compareTo(map.get(o1)));
-        StringBuilder sb = new StringBuilder();
+        //카운트 별로 내림차순 정렬
+        List<String> keySet = new ArrayList<>(countMap.keySet());
+        keySet.sort((o1, o2) -> countMap.get(o2).compareTo(countMap.get(o1)));
+        parseCountResult.append("csv-file name : ").append(file.getOriginalFilename())
+            .append("\n");
         for (String key : keySet) {
-            sb.append(key).append("\t").append(map.get(key)).append("\n");
+            parseCountResult.append(key).append("\t").append(countMap.get(key)).append("\n");
+        }
+
+        parseLogResult.append("------------------------------").append("\n");
+        parseLogResult.append("parse end time : ").append(LocalDateTime.now()).append("\n");
+        parseLogResult.append("parse target count : ").append(list.size()).append("\n");
+        parseLogResult.append("parse success count : ").append(successCount).append("\n");
+        parseLogResult.append("parse fail count : ").append(failCount).append("\n");
+        parseLogResult.append("------------------------------").append("\n");
+
+        logger.info("------------------------------");
+        logger.info("parse end time : {}", LocalDateTime.now());
+        logger.info("parse target count : {}", list.size());
+        logger.info("parse success count : {}", successCount);
+        logger.info("parse fail count : {}", failCount);
+        logger.info("------------------------------");
+
+        try {
+            fileUtil.writeLog(path, "result.txt", parseCountResult.toString());
+            fileUtil.writeLog(path, "result.log", parseLogResult.toString());
+        } catch (IOException e) {
+            logger.error(ParseDomainValidationMessage.ERROR_CREATE_RESULT.getMessage());
+            throw new DomainValidationException(ParseDomainValidationMessage.ERROR_CREATE_RESULT);
         }
 
         return new ParseSchoolResponse(true, path, replyId - 1, successCount, failCount);

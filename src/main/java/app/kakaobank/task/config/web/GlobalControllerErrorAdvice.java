@@ -1,6 +1,6 @@
 package app.kakaobank.task.config.web;
 
-import app.kakaobank.task.domain.DomainValidationException;
+import app.kakaobank.task.support.domain.DomainValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

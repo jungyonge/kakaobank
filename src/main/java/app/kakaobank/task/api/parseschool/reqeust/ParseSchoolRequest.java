@@ -5,12 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
-@Schema(description = "로그인 요청 request")
+@Schema(description = "파싱 요청 request")
 @Getter
 @AllArgsConstructor
 public class ParseSchoolRequest {
 
+    @Schema(description = "결과물 저장할 path", example = "/Users/jungyong/Downloads")
     private String path;
 
-    private MultipartFile excelFile;
+    @Schema(description = "파싱할 데이터")
+    private MultipartFile file;
 }

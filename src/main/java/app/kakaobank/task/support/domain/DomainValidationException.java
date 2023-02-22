@@ -1,9 +1,10 @@
-package app.kakaobank.task.domain;
+package app.kakaobank.task.support.domain;
 
 public class DomainValidationException extends RuntimeException {
 
-    private final int code;
-    private final int httpStatus;
+    private int code;
+    private int httpStatus;
+    private String originalMessage;
 
     public DomainValidationException(ExplainableMessage explainableMessage) {
         super(explainableMessage.getMessage());
@@ -19,4 +20,7 @@ public class DomainValidationException extends RuntimeException {
         return this.httpStatus;
     }
 
+    public String getOriginalMessage() {
+        return originalMessage;
+    }
 }

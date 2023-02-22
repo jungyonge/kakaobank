@@ -41,15 +41,16 @@ public class FileUtil {
         return list;
     }
 
-    public boolean writeLog(String filePath, String log) {
+    public boolean writeLog(String filePath, String fileName, String log) throws IOException {
 
-        var file = new File(String.format("%s/%s", filePath, "result.txt"));
+        var file = new File(String.format("%s/%s", filePath, fileName));
 
         if (file.exists()) {
             var deleteFileResult = file.delete();
 
             if (!deleteFileResult) {
-                return false;
+                logger.error("file delete fail");
+                throw new IOException();
             }
         }
 
@@ -61,7 +62,7 @@ public class FileUtil {
             }
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-            return false;
+            throw e;
         }
 
         try {
@@ -72,7 +73,7 @@ public class FileUtil {
             writer.close();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-            return false;
+            throw e;
         }
 
         return true;
